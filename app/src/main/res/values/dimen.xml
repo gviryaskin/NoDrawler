@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="dlg_html_width">460dp</dimen>
+    <dimen name="dlg_html_height">25dp</dimen>
+</resources>
