@@ -1,19 +1,26 @@
 package com.example.nodrawler
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
+import android.gesture.GestureLibraries
+import android.gesture.GestureLibrary
+import android.gesture.GestureOverlayView
+import android.gesture.Prediction
 import android.graphics.Color
 import android.graphics.Insets
 import android.graphics.Point
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.View.OnTouchListener
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.GestureDetectorCompat
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,16 +30,59 @@ import kotlin.math.abs
 
 class MenuDialog : DialogFragment() {
     lateinit var recycler: RecyclerView
-    lateinit var v:View
+    lateinit var v:RvView
+    lateinit var library: GestureLibrary
 
+    private lateinit var gesture: GestureDetectorCompat
+    private val gestureListener = object : SimpleOnGestureListener() {
+        override fun onFling(p0: MotionEvent, p1: MotionEvent, p2: Float, p3: Float): Boolean {
+            Log.d("TTT", "onFling")
+            return true
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        v = LayoutInflater.from(requireContext()).inflate(R.layout.dlg_menu,null,false)
+        if (context == null)
+            throw java.lang.IllegalStateException("")
+        v = RvView(requireContext())
+        recycler = v.findViewById(R.id.rView)
+        recycler.layoutManager = LinearLayoutManager(requireContext())
+        recycler.adapter = PlaceholderAdapter()
+        v.swipeListener = RvView.OnSwipeListener {
+            dismiss()
+        }
+//        gesture = GestureDetectorCompat(context, gestureListener)
+//        library = GestureLibraries.fromRawResource(context, R.raw.gestures)
+//        library.load()
+//        val gg = v.findViewById<GestureOverlayView>(R.id.gestures)
+//        gg.addOnGesturePerformedListener { overlay, gesture ->
+//            val predictions: ArrayList<Prediction> = library.recognize(gesture)
+//            Log.d("TTT", "$overlay --- $gesture -- $predictions")
+//            if (predictions.size > 0 && predictions[0].score > 1.0) {
+//                val action = predictions[0].name
+//                if ("prev" == action) {
+//                    Toast.makeText(context, "Adding a contact", Toast.LENGTH_SHORT).show()
+//                    dismiss()
+//                } else if ("action_delete" == action) {
+//                    Toast.makeText(context, "Removing a contact", Toast.LENGTH_SHORT).show()
+//                } else if ("action_refresh" == action) {
+//                    Toast.makeText(context, "Reloading contacts", Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//        }
 
-        recycler=v.findViewById<RecyclerView>(R.id.rView)
-        recycler.layoutManager=LinearLayoutManager(requireContext())
-        recycler.adapter=PlaceholderAdapter()
-
-        return AlertDialog.Builder(requireContext(),R.style.DialogMenu).setView(v).create()
+        val myDialog = object : AlertDialog(context, R.style.DialogMenu) {
+            override fun onTouchEvent(event: MotionEvent): Boolean {
+                if (v.onTouchEvent(event))
+                    return true
+                return super.onTouchEvent(event)
+            }
+        }.apply {
+            setView(v)
+            window?.attributes?.windowAnimations = R.style.DialogMenu
+        }
+        return myDialog
     }
 
     class PlaceholderVH(itemView: View) : ViewHolder(itemView){
@@ -49,7 +99,7 @@ class MenuDialog : DialogFragment() {
         }
 
         override fun getItemCount(): Int {
-            return 10
+            return 100
         }
     }
 
@@ -94,7 +144,7 @@ class MenuDialog : DialogFragment() {
             params.width=(size.x * 0.60).toInt()
             params.height=(size.y* 1).toInt()
             v.layoutParams=params
-            
+
             super.onResume()
         }
     }

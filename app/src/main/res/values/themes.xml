@@ -17,7 +17,7 @@
     <style name="DialogMenu" parent="android:Theme.Material.Dialog.Alert">
         <item name="android:windowMinWidthMajor">0%</item>
         <item name="android:windowMinWidthMinor">0%</item>
-        <item name="android:windowEnterAnimation">@android:anim/slide_in_left</item>
+        <item name="android:windowEnterAnimation">@anim/sl_in</item>
         <item name="android:windowExitAnimation">@android:anim/slide_out_right</item>
     </style>
 </resources>
